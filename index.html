@@ -1,0 +1,834 @@
+<html><head><base href="."><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"><style>
+:root {
+    --primary: #2c3e50;
+    --secondary: #34495e;
+    --accent: #3498db;
+    --light: #ecf0f1;
+    --success: #27ae60;
+    --warning: #f1c40f;
+    --danger: #e74c3c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+    height: 100vh; /* Fill viewport height */
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background: var(--primary);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    flex: 1; /* Take remaining space */
+    min-height: 0; /* Allow shrinking */
+    width: 100%;
+}
+
+.column {
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    height: 100%; /* Fill parent height */
+    min-height: 0; /* Allow shrinking */
+}
+
+.column-header {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    padding: 12px; /* Adjusted padding */
+    border-bottom: 2px solid var(--accent);
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.tasks-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px; /* Adjusted padding */
+    min-height: 0; /* Allow shrinking */
+    -webkit-overflow-scrolling: touch; /* Fix touch scrolling on iOS */
+}
+
+.tasks-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tasks-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.tasks-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.tasks-container::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+.task {
+    background: var(--light);
+    padding: 12px; /* Adjusted padding */
+    margin: 8px 0; /* Adjusted margin */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.task:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.task-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--secondary);
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.priority {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.priority.high {
+    background: var(--danger);
+    color: white;
+}
+
+.priority.medium {
+    background: var(--warning);
+}
+
+.priority.low {
+    background: var(--success);
+    color: white;
+}
+
+.add-task {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px; /* Adjusted padding */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin: 1rem 0;
+    transition: background 0.3s ease;
+    min-height: 44px; /* Improved touch target */
+}
+
+.add-task:hover {
+    background: #2980b9;
+}
+
+.filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    overflow-x: auto; /* Make filters scrollable on mobile */
+    padding-bottom: 5px;
+    -webkit-overflow-scrolling: touch; /* Fix touch scrolling for filters */
+}
+
+.filter {
+    background: white;
+    border: 1px solid var(--accent);
+    padding: 8px 16px; /* Adjusted padding */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 44px; /* Improved touch target */
+}
+
+.filter:hover, .filter.active {
+    background: var(--accent);
+    color: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.task {
+    animation: fadeIn 0.3s ease;
+}
+
+.task-moving {
+    opacity: 0.6;
+    transform: scale(0.95);
+}
+
+.task-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.8rem; /* Adjusted margin */
+}
+
+.task-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--secondary);
+    transition: color 0.3s ease;
+    padding: 8px; /* Adjusted padding */
+    font-size: 1.2rem; /* Adjusted font size */
+}
+
+.task-action:hover {
+    color: var(--accent);
+}
+
+.task-action.complete {
+    color: var(--success);
+}
+
+.task-action.delete {
+    color: var(--danger);
+}
+
+.task.completed {
+    opacity: 0.7;
+    background: #f8f9fa;
+    text-decoration: line-through;
+}
+
+.task.completed .task-title {
+    color: var(--secondary);
+}
+
+.task-dialog {
+    width: 90%; /* Adjusted dialog width */
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: dialogOpen 0.3s ease-out;
+}
+
+@keyframes dialogOpen {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.task-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: auto;
+    width: 100%; /* Match dialog width */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 8px; /* Adjusted padding */
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-size: 16px; /* Prevent iOS zoom on focus */
+}
+
+.form-group input:invalid,
+.form-group select:invalid {
+    border-color: var(--danger);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-direction: column; /* Adjust for mobile layout */
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 12px 20px; /* Adjusted padding */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%; /* Full width for buttons */
+}
+
+.btn-cancel {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.btn-submit {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #dde1e3;
+}
+
+.btn-submit:hover {
+    background: #2980b9;
+}
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.5rem;
+        padding: 10px 0;
+    }
+
+    .column-header {
+        font-size: 1.1rem;
+        padding: 12px;
+    }
+
+    .task-title {
+        font-size: 1rem;
+    }
+
+    .priority {
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+        font-size: 16px; /* Prevent iOS zoom on focus */
+        padding: 12px 8px;
+    }
+
+    .dialog-buttons {
+        flex-direction: column;
+    }
+}
+
+</style>
+<script src="https://unpkg.com/ipfs/dist/index.min.js"></script>
+<script src="https://unpkg.com/orbit-db/dist/orbitdb.min.js"></script></head><body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-tasks"></i> Software Development Planner</h1>
+    </div>
+    
+    <div class="filters">
+        <button class="filter active">Tutti</button>
+        <button class="filter">Alta Priorità</button>
+        <button class="filter">In Progress</button>
+        <button class="filter">Completati</button>
+    </div>
+
+    <button class="add-task"><i class="fas fa-plus"></i> Aggiungi Task</button>
+
+    <dialog id="addTaskDialog" class="task-dialog">
+        <form method="dialog" class="dialog-form">
+            <h2><i class="fas fa-plus"></i> Nuovo Task</h2>
+            
+            <div class="form-group">
+                <label for="taskName">Nome del Task:</label>
+                <input type="text" id="taskName" required="">
+            </div>
+
+            <div class="form-group">
+                <label for="taskPriority">Priorità:</label>
+                <select id="taskPriority" required="">
+                    <option value="high">Alta</option>
+                    <option value="medium">Media</option>
+                    <option value="low">Bassa</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="taskDays">Giorni Stimati:</label>
+                <input type="number" id="taskDays" min="1" required="">
+            </div>
+
+            <div class="dialog-buttons">
+                <button type="button" class="btn-cancel">Annulla</button>
+                <button type="submit" class="btn-submit">Aggiungi</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div class="board">
+        <div class="column">
+            <div class="column-header">
+                <i class="fas fa-list"></i> Da Fare
+            </div>
+            <div class="tasks-container">
+                <div class="task">
+                    <div class="task-title">Setup Ambiente di Sviluppo</div>
+                    <div class="task-meta">
+                        <span class="priority high">Alta Priorità</span>
+                        <span><i class="far fa-clock"></i> 2 giorni</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action start" title="Inizia"><i class="fas fa-play"></i></button>
+                        <button class="task-action complete" title="Completa">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="task-action edit" title="Modifica">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-action delete" title="Elimina">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="task">
+                    <div class="task-title">Wireframe Homepage</div>
+                    <div class="task-meta">
+                        <span class="priority medium">Media Priorità</span>
+                        <span><i class="far fa-clock"></i> 3 giorni</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action start" title="Inizia"><i class="fas fa-play"></i></button>
+                        <button class="task-action complete" title="Completa">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="task-action edit" title="Modifica">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-action delete" title="Elimina">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="task">
+                    <div class="task-title">Configurazione Database</div>
+                    <div class="task-meta">
+                        <span class="priority high">Alta Priorità</span>
+                        <span><i class="far fa-clock"></i> 4 giorni</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action start" title="Inizia"><i class="fas fa-play"></i></button>
+                        <button class="task-action complete" title="Completa">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="task-action edit" title="Modifica">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-action delete" title="Elimina">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="task">
+                    <div class="task-title">Design UI Components</div>
+                    <div class="task-meta">
+                        <span class="priority low">Bassa Priorità</span>
+                        <span><i class="far fa-clock"></i> 3 giorni</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action start" title="Inizia"><i class="fas fa-play"></i></button>
+                        <button class="task-action complete" title="Completa">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="task-action edit" title="Modifica">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="task-action delete" title="Elimina">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="column-header">
+                <i class="fas fa-spinner"></i> In Progress
+            </div>
+            <div class="tasks-container">
+                <div class="task">
+                    <div class="task-title">Implementazione API</div>
+                    <div class="task-meta">
+                        <span class="priority high">Alta Priorità</span>
+                        <span><i class="far fa-clock"></i> 5 giorni</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action complete" title="Completa"><i class="fas fa-check"></i></button>
+                        <button class="task-action edit" title="Modifica"><i class="fas fa-edit"></i></button>
+                        <button class="task-action delete" title="Elimina"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="column-header">
+                <i class="fas fa-check"></i> Completati
+            </div>
+            <div class="tasks-container">
+                <div class="task">
+                    <div class="task-title">Analisi Requisiti</div>
+                    <div class="task-meta">
+                        <span class="priority low">Bassa Priorità</span>
+                        <span><i class="far fa-clock"></i> Completato</span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="task-action complete" title="Completa"><i class="fas fa-check"></i></button>
+                        <button class="task-action edit" title="Modifica"><i class="fas fa-edit"></i></button>
+                        <button class="task-action delete" title="Elimina"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let orbitdb;
+let tasksDb;
+
+async function initOrbitDb() {
+    try {
+        const ipfs = await window.Ipfs.create();
+        orbitdb = await OrbitDB.createInstance(ipfs);
+        tasksDb = await orbitdb.docstore('tasks', {
+            indexBy: 'id',
+            replicate: true
+        });
+        await tasksDb.load();
+        const tasks = await loadTasks();
+        renderTasks(tasks);
+    } catch (error) {
+        console.error('Failed to initialize OrbitDB:', error);
+        alert('Failed to initialize database. Some features may not work.');
+    }
+}
+
+async function saveTasks(task) {
+    try {
+        const taskWithId = {
+            ...task,
+            id: Date.now().toString(),
+            createdAt: new Date().toISOString()
+        };
+        await tasksDb.put(taskWithId);
+        return taskWithId;
+    } catch (error) {
+        console.error('Failed to save task:', error);
+        throw error;
+    }
+}
+
+async function loadTasks() {
+    try {
+        const tasks = await tasksDb.query(doc => doc);
+        return tasks;
+    } catch (error) {
+        console.error('Failed to load tasks:', error);
+        return [];
+    }
+}
+
+async function updateTask(taskId, updates) {
+    try {
+        const task = (await tasksDb.get(taskId))[0];
+        if (!task) throw new Error('Task not found');
+        const updatedTask = { ...task, ...updates };
+        await tasksDb.put(updatedTask);
+        return updatedTask;
+    } catch (error) {
+        console.error('Failed to update task:', error);
+        throw error;
+    }
+}
+
+async function deleteTask(taskId) {
+    try {
+        await tasksDb.del(taskId);
+    } catch (error) {
+        console.error('Failed to delete task:', error);
+        throw error;
+    }
+}
+
+function renderTasks(tasks) {
+    document.querySelectorAll('.tasks-container').forEach(container => {
+        container.innerHTML = '';
+    });
+    tasks.forEach(task => {
+        const column = task.status === 'completed' ? 
+            document.querySelector('.column:last-child .tasks-container') :
+            task.status === 'in-progress' ?
+            document.querySelector('.column:nth-child(2) .tasks-container') :
+            document.querySelector('.column:first-child .tasks-container');
+        renderTask(task, column);
+    });
+}
+
+function renderTask(task, column) {
+    const newTask = document.createElement('div');
+    newTask.className = 'task';
+    newTask.dataset.taskId = task.id;
+    
+    const priorityText = {
+        'high': 'Alta',
+        'medium': 'Media',
+        'low': 'Bassa'
+    }[task.priority];
+    
+    newTask.innerHTML = `
+        <div class="task-title">${task.title}</div>
+        <div class="task-meta">
+            <span class="priority ${task.priority}">${priorityText} Priorità</span>
+            <span><i class="far fa-clock"></i> ${task.days} giorni</span>
+        </div>
+        <div class="task-actions">
+            <button class="task-action start" title="Inizia"><i class="fas fa-play"></i></button>
+            <button class="task-action complete" title="Completa"><i class="fas fa-check"></i></button>
+            <button class="task-action edit" title="Modifica"><i class="fas fa-edit"></i></button>
+            <button class="task-action delete" title="Elimina"><i class="fas fa-trash"></i></button>
+        </div>
+    `;
+    
+    column.appendChild(newTask);
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await initOrbitDb();
+    
+    const filters = document.querySelectorAll('.filter');
+    const tasks = document.querySelectorAll('.task');
+
+    filters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            filters.forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterText = this.textContent.toLowerCase();
+            
+            document.querySelectorAll('.task').forEach(task => {
+                const priorityEl = task.querySelector('.priority');
+                const columnHeaderEl = task.closest('.column')?.querySelector('.column-header');
+                
+                if (!priorityEl || !columnHeaderEl) return;
+                
+                const priority = priorityEl.textContent.toLowerCase();
+                const column = columnHeaderEl.textContent.toLowerCase();
+                
+                const shouldShow = 
+                    filterText === 'tutti' || 
+                    (filterText === 'alta priorità' && priority.includes('alta')) ||
+                    (filterText === 'in progress' && column.includes('progress')) ||
+                    (filterText === 'completati' && column.includes('completati'));
+                
+                task.style.display = shouldShow ? 'block' : 'none';
+            });
+        });
+    });
+
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.task-action')) {
+            const action = e.target.closest('.task-action');
+            const task = action.closest('.task');
+            const taskId = task.dataset.taskId;
+            
+            try {
+                if (action.classList.contains('complete')) {
+                    await updateTask(taskId, { status: 'completed' });
+                    task.classList.add('task-moving');
+                    document.querySelector('.column:last-child .tasks-container').appendChild(task);
+                    task.classList.add('completed');
+                    task.classList.remove('task-moving');
+                } else if (action.classList.contains('start')) {
+                    await updateTask(taskId, { status: 'in-progress' });
+                    task.classList.add('task-moving');
+                    document.querySelector('.column:nth-child(2) .tasks-container').appendChild(task);
+                    task.classList.remove('completed');
+                    task.classList.remove('task-moving');
+                } else if (action.classList.contains('edit')) {
+                    const taskTitle = task.querySelector('.task-title');
+                    let newTitle = prompt('Modifica nome del task:', taskTitle.textContent);
+                    
+                    if (newTitle) {
+                        newTitle = newTitle.trim();
+                        if (!newTitle) {
+                            alert('Il nome del task non può essere vuoto');
+                            return;
+                        }
+                        taskTitle.textContent = newTitle;
+                        await updateTask(taskId, { title: newTitle });
+                    }
+
+                    const prioritySpan = task.querySelector('.priority');
+                    let newPriority = prompt('Modifica priorità (alta/media/bassa):', 
+                        prioritySpan.textContent.toLowerCase().replace(' priorità', ''));
+                    
+                    if (newPriority) {
+                        newPriority = newPriority.trim().toLowerCase();
+                        if (!['alta', 'media', 'bassa'].includes(newPriority)) {
+                            alert('La priorità deve essere alta, media o bassa');
+                            return;
+                        }
+                        const priorityClass = newPriority === 'alta' ? 'high' : newPriority === 'media' ? 'medium' : 'low';
+                        prioritySpan.className = `priority ${priorityClass}`;
+                        prioritySpan.textContent = newPriority.charAt(0).toUpperCase() + newPriority.slice(1) + ' Priorità';
+                        await updateTask(taskId, { priority: newPriority });
+                    }
+
+                    const timeSpan = task.querySelector('.fa-clock').parentElement;
+                    let newDays = prompt('Modifica giorni stimati:', 
+                        timeSpan.textContent.replace(' giorni', ''));
+                    
+                    if (newDays) {
+                        newDays = parseInt(newDays);
+                        if (isNaN(newDays) || newDays < 1) {
+                            alert('Inserisci un numero valido di giorni');
+                            return;
+                        }
+                        timeSpan.innerHTML = `<i class="far fa-clock"></i> ${newDays} giorni`;
+                        await updateTask(taskId, { days: newDays });
+                    }
+                } else if (action.classList.contains('delete')) {
+                    if (confirm('Sei sicuro di voler eliminare questo task?')) {
+                        await deleteTask(taskId);
+                        task.remove();
+                    }
+                }
+            } catch (error) {
+                alert('Failed to update task. Please try again.');
+            }
+        }
+    });
+
+    const addTaskButton = document.querySelector('.add-task');
+    const addTaskDialog = document.querySelector('#addTaskDialog');
+
+    addTaskButton.addEventListener('click', () => {
+        addTaskDialog.showModal();
+    });
+
+    document.querySelector('.btn-cancel').addEventListener('click', () => {
+        addTaskDialog.close();
+    });
+
+    document.querySelector('.dialog-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const taskName = document.querySelector('#taskName').value.trim();
+        const priority = document.querySelector('#taskPriority').value;
+        const days = parseInt(document.querySelector('#taskDays').value);
+        
+        if (!taskName || taskName.length < 3) {
+            alert('Il nome del task deve contenere almeno 3 caratteri');
+            return;
+        }
+        
+        if (taskName.length > 50) {
+            alert('Il nome del task non può superare i 50 caratteri');
+            return;
+        }
+        
+        if (!days || isNaN(days) || days < 1 || days > 365) {
+            alert('Inserisci un numero di giorni valido (1-365)');
+            return;
+        }
+        
+        if (!['high', 'medium', 'low'].includes(priority)) {
+            alert('Seleziona una priorità valida');
+            return;
+        }
+        
+        try {
+            const task = await saveTasks({
+                title: taskName,
+                priority,
+                days,
+                status: 'todo'
+            });
+            
+            const todoColumn = document.querySelector('.column:first-child .tasks-container');
+            renderTask(task, todoColumn);
+            
+            e.target.reset();
+            addTaskDialog.close();
+        } catch (error) {
+            alert('Failed to save task. Please try again.');
+        }
+    });
+
+    document.querySelector('#taskName').addEventListener('input', function() {
+        this.setCustomValidity('');
+        if (this.value.trim().length < 3) {
+            this.setCustomValidity('Il nome deve contenere almeno 3 caratteri');
+        } else if (this.value.trim().length > 50) {
+            this.setCustomValidity('Il nome non può superare i 50 caratteri');
+        }
+    });
+
+    document.querySelector('#taskDays').addEventListener('input', function() {
+        this.setCustomValidity('');
+        const days = parseInt(this.value);
+        if (isNaN(days) || days < 1 || days > 365) {
+            this.setCustomValidity('Inserisci un numero di giorni valido (1-365)');
+        }
+    });
+});
+</script>
+</body></html>
